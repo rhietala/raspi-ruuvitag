@@ -23,30 +23,16 @@ and presents it.
 
 Devops is not automated, these have to be done manually.
 
-Installing dependencies:
+Installation:
 
 ```sh
-python -m pip install -r requirements.txt
-```
+$ pwd
+/home/pi
 
-Setting up systemd configurations:
-
-```sh
-
-```
-
-## Development
-
-Installing development dependencies:
-
-```sh
-python -m pip install -r requirements-dev.txt
-```
-
-Linting
-
-```sh
-./lint.sh
+$ sudo apt-get install bluez bluez-hcidump git
+$ git clone https://github.com/rhietala/raspi-ruuvitag.git
+$ cd raspi-ruuvitag
+$ python -m pip install -r requirements.txt
 ```
 
 ## find_ruuvitags.py
@@ -79,6 +65,73 @@ The output is exactly the same as with ruuvitag-sensor package's command
 $ python -m ruuvitag_sensor -f
 ```
 
-## ruuvitag-webserver.py
+## httpserver.py
 
-This is relevant to all raspberries that fetch data from ruuvitags.
+Simple HTTP server that serves data from ruuvitags as JSON.
+
+Ruuvitag MAC addresses have to be manually configured in `ruuvitags.json`.
+
+It has two routes:
+
+- `/` returns latest data from all scanned ruuvitags
+- `/<mac>` returns latest data for a given ruuvitag
+
+Setting up systemd:
+
+```sh
+$ sudo ln -s /home/pi/raspi-ruuvitag/ruuvitag-httpserver.service /etc/systemd/system/
+$ sudo systemctl daemon-reload
+$ sudo systemctl enable ruuvitag-httpserver
+$ sudo systemctl start ruuvitag-httpserver
+$ sudo systemctl status ruuvitag-httpserver
+
+● ruuvitag-httpserver.service - Ruuvitag sensor readings
+     Loaded: loaded (/home/pi/raspi-ruuvitag/ruuvitag-httpserver.service; enabled; vendor preset: enabled)
+     Active: active (running) since Fri 2023-01-06 15:33:35 EET; 1min 51s ago
+   Main PID: 20924 (python)
+      Tasks: 17 (limit: 876)
+        CPU: 24.867s
+     CGroup: /system.slice/ruuvitag-httpserver.service
+             ├─20924 python httpserver.py
+             ├─20928 python httpserver.py
+             ├─20939 python httpserver.py
+             ├─20946 python httpserver.py
+             ├─20958 /usr/bin/sudo hcitool -i hci0 lescan2 --duplicates --passive
+             ├─20959 /usr/bin/sudo hcidump -i hci0 --raw
+             ├─20960 hcitool -i hci0 lescan2 --duplicates --passive
+             └─20961 hcidump -i hci0 --raw
+```
+
+The systemd service assumes that this repository is cloned to directory
+`/home/pi/raspi-ruuvitag`, and that user and group are `pi` / `pi`.
+
+After this, curl should return something:
+
+```sh
+$ curl http://192.168.1.117:5000/ | jq | head
+
+{
+  "CC:92:E5:0C:A1:1B": {
+    "data_format": 5,
+    "humidity": 37.8,
+    "temperature": 17.21,
+    "pressure": 1013.11,
+    "acceleration": 996.0803180466925,
+    "acceleration_x": -852,
+    "acceleration_y": 516,
+    "acceleration_z": 4,
+```
+
+## Development
+
+Installing development dependencies:
+
+```sh
+$ python -m pip install -r requirements-dev.txt
+```
+
+Linting
+
+```sh
+$ ./lint.sh
+```

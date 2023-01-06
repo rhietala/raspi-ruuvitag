@@ -1,0 +1,17 @@
+[Unit]
+Description=Ruuvitag sensor readings
+After=syslog.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/raspi-ruuvitag
+ExecStart=/usr/bin/env python httpserver.py
+StandardOutput=syslog
+StandardError=syslog
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=ruuvitag-httpserver.target
