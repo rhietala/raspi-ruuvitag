@@ -49,9 +49,35 @@ Linting
 ./lint.sh
 ```
 
-## ruuvitag-find-sensors.py
+## find_ruuvitags.py
 
 Simple script to output scanned ruuvitags to console.
+
+This can be used to find the MAC addresses of ruuvitags, and check which raspberry
+has connectivity to which ruuvitags. This is important to know so that HomeAssistant
+can be configured correctly.
+
+```sh
+$ python find_ruuvitags.py
+
+Finding RuuviTags. Stop with Ctrl+C.
+Start receiving broadcasts (device hci0)
+FYI: Calling a process with sudo: hciconfig hci0 reset
+FYI: Spawning process with sudo: hcitool -i hci0 lescan2 --duplicates --passive
+FYI: Spawning process with sudo: hcidump -i hci0 --raw
+D7:98:F9:48:88:7A
+{'data_format': 5, 'humidity': 40.05, 'temperature': 18.94, 'pressure': 1013.12, 'acceleration': 1053.9525606022312, 'acceleration_x': 880, 'acceleration_y': -580, 'acceleration_z': -4, 'tx_power': 4, 'battery': 2844, 'movement_counter': 27, 'measurement_sequence_number': 48598, 'mac': 'd798f948887a'}
+C7:3C:89:4D:AF:53
+{'data_format': 5, 'humidity': 37.79, 'temperature': 19.0, 'pressure': 1013.73, 'acceleration': 1032.4495145042201, 'acceleration_x': 1032, 'acceleration_y': 28, 'acceleration_z': -12, 'tx_power': 4, 'battery': 2904, 'movement_counter': 53, 'measurement_sequence_number': 48333, 'mac': 'c73c894daf53'}
+DC:AA:61:EC:A9:5B
+{'data_format': 5, 'humidity': 83.64, 'temperature': -8.22, 'pressure': 1014.29, 'acceleration': 1057.4686756590004, 'acceleration_x': 1036, 'acceleration_y': -212, 'acceleration_z': 0, 'tx_power': 4, 'battery': 2577, 'movement_counter': 221, 'measurement_sequence_number': 47305, 'mac': 'dcaa61eca95b'}
+```
+
+The output is exactly the same as with ruuvitag-sensor package's command
+
+```sh
+$ python -m ruuvitag_sensor -f
+```
 
 ## ruuvitag-webserver.py
 
