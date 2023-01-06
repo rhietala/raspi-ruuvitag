@@ -10,14 +10,18 @@ A collection of my personal scripts for getting data from
 Data fetching
 
 ```
-ruuvitag --- raspberry pi --- homeassistant
+RuuviTag --- Raspberry Pi --- HomeAssistant
 
-      bluetooth          http
+      Bluetooth          HTTP
 ```
 
 The idea is that Raspberry Pi scans for ruuvitags and shares their live data with
-a simple http api. HomeAssistant fetches data through http, stores the history
+a simple http api. HomeAssistant fetches data through HTTP, stores the history
 and presents it.
+
+Thermometer display fetches data from HomeAssistant over HTTP and shows it.
+
+![Photo of thermometer display in action](thermometer.jpg)
 
 ## Prerequisites on Raspberries
 
@@ -29,6 +33,7 @@ Installation:
 $ pwd
 /home/pi
 
+$ sudo usermod -a -G i2c pi
 $ sudo apt-get install bluez bluez-hcidump git
 $ git clone https://github.com/rhietala/raspi-ruuvitag.git
 $ cd raspi-ruuvitag
@@ -37,10 +42,10 @@ $ python -m pip install -r requirements.txt
 
 ## find_ruuvitags.py
 
-Simple script to output scanned ruuvitags to console.
+Simple script to output scanned RuuviTags to console.
 
-This can be used to find the MAC addresses of ruuvitags, and check which raspberry
-has connectivity to which ruuvitags. This is important to know so that HomeAssistant
+This can be used to find the MAC addresses of ruuvitags, and check which Raspberry Pi
+has connectivity to which RuuviTags. This is important to know so that HomeAssistant
 can be configured correctly.
 
 ```sh
@@ -67,9 +72,9 @@ $ python -m ruuvitag_sensor -f
 
 ## httpserver.py
 
-Simple HTTP server that serves data from ruuvitags as JSON.
+Simple HTTP server that serves data from RuuviTags as JSON.
 
-Ruuvitag MAC addresses have to be manually configured in `ruuvitags.json`.
+RuuviTag MAC addresses have to be manually configured in `ruuvitags.json`.
 
 It has two routes:
 
@@ -120,6 +125,55 @@ $ curl http://192.168.1.117:5000/ | jq | head
     "acceleration_x": -852,
     "acceleration_y": 516,
     "acceleration_z": 4,
+```
+
+HomeAssistant configuration should be something like this (`configuration.yaml`):
+
+```yaml
+sensor:
+  - platform: "command_line"
+    unique_id: "CC:92:E5:0C:A1:1B.temp"
+    name: "Olohuone lämpötila"
+    command: "curl 'http://192.168.1.241:5000/CC:92:E5:0C:A1:1B'"
+    unit_of_measurement: "°C"
+    value_template: "{{ value_json.temperature }}"
+```
+
+## thermometer_display.py
+
+Thermometer display for Raspberry Pi with three Adafruit 7-segment displays.
+
+This is highly specific to my setup, but it should be easy to adapt to your
+needs. It displays the current time on the first display and two temperatures
+on the other two displays. The temperatures are read from a Home Assistant
+instance using the Home Assistant API.
+
+[Adafruit LED Backpack](https://github.com/adafruit/Adafruit_Python_LED_Backpack)
+Python library must be configured in the Raspberry with displays.
+
+API token must be created in HomeAssistant through User Profile - Long-Lived
+Access Tokens, and it must be stored in `thermometer-display.service` to
+`HOMEASSISTANT_BEARER_TOKEN`.
+
+Setting up systemd:
+
+```sh
+$ sudo ln -s /home/pi/raspi-ruuvitag/thermometer-display.service /etc/systemd/system/
+$ sudo systemctl daemon-reload
+$ sudo systemctl enable thermometer-display
+$ sudo systemctl start thermometer-display
+$ sudo systemctl status thermometer-display
+
+● thermometer-display.service - Thermometer display
+     Loaded: loaded (/home/pi/raspi-ruuvitag/thermometer-display.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sat 2023-01-07 20:58:20 EET; 10min ago
+   Main PID: 1249 (python)
+      Tasks: 1 (limit: 876)
+        CPU: 16.327s
+     CGroup: /system.slice/thermometer-display.service
+             └─1249 python thermometer_display.py
+
+Jan 07 21:08:25 rpi env[1249]: INFO:root:Got reading: 16.95 for sensor sensor.a11b_temperature
 ```
 
 ## Development

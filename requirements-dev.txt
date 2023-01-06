@@ -1,5 +1,6 @@
-ruuvitag_sensor
 aiohttp
+requests
+ruuvitag_sensor
 
 black
 mypy

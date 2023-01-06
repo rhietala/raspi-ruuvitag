@@ -1,0 +1,18 @@
+[Unit]
+Description=Thermometer display
+After=syslog.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/raspi-ruuvitag
+ExecStart=/usr/bin/env python thermometer_display.py
+StandardOutput=syslog
+StandardError=syslog
+Restart=always
+RestartSec=2
+Environment="HOMEASSISTANT_BEARER_TOKEN=foobar"
+
+[Install]
+WantedBy=ruuvitag-httpserver.target
