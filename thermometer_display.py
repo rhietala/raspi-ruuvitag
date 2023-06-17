@@ -83,19 +83,25 @@ def get_sensor_reading(sensor: str, bearer_token: str) -> Optional[float]:
         logging.error("Error while getting sensor reading: %s", error)
         return None
 
-    if response:
-        logging.info(
-            "Got reading: %s for sensor %s", response.json()["state"], sensor
-        )
-        try:
-            state = response.json()["state"]
-            return float(state)
-        except ValueError:
-            logging.warning("Got non-float value %s for sensor %s", state, sensor)
-            return None
+    if not response:
+        logging.warning("Failed to get reading for sensor %s", sensor)
+        return None
 
-    logging.warning("Failed to get reading for sensor %s", sensor)
-    return None
+    try:
+        state = response.json()["state"]
+        value = float(state)
+    except ValueError:
+        logging.warning("Got non-float value %s for sensor %s", state, sensor)
+        return None
+
+    if value > 1000:
+        logging.warning(
+            "Got value %s > 1000 for sensor %s, ignoring", value, sensor
+        )
+        return None
+
+    return value
+
 
 
 def get_temperature_readings(bearer_token: str) -> Sequence[Optional[float]]:
