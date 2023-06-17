@@ -1,5 +1,6 @@
 [Unit]
 Description=Ruuvitag sensor readings
+Wants=network.target
 After=network.target
 
 [Service]
@@ -14,4 +15,4 @@ Restart=always
 RestartSec=2
 
 [Install]
-WantedBy=ruuvitag-httpserver.target
+WantedBy=multi-user.target
