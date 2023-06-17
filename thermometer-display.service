@@ -1,6 +1,6 @@
 [Unit]
 Description=Thermometer display
-After=syslog.target
+After=network.target
 
 [Service]
 Type=simple
@@ -15,4 +15,4 @@ RestartSec=2
 Environment="HOMEASSISTANT_BEARER_TOKEN=foobar"
 
 [Install]
-WantedBy=ruuvitag-httpserver.target
+WantedBy=thermometer-display.target
