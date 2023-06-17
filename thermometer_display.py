@@ -47,11 +47,14 @@ def display_time(display) -> None:
 
 
 def display_temperatures(
-    displays: Sequence[Any], temperatures: Sequence[float]
+    displays: Sequence[Any], temperatures: Sequence[Optional[float]]
 ) -> None:
     """Display the temperatures on the 7-segment displays."""
     for display, temperature in zip(displays, temperatures):
-        display.print_float(temperature, decimal_digits=1)
+        if temperature:
+            display.print_float(temperature, decimal_digits=1)
+        else:
+            display.print_number_str("----")
 
 
 def set_display_brightness(displays: Sequence[Any]) -> None:
@@ -65,7 +68,7 @@ def set_display_brightness(displays: Sequence[Any]) -> None:
         display.set_brightness(brightness)
 
 
-def get_sensor_reading(sensor: str, bearer_token: str) -> Optional[str]:
+def get_sensor_reading(sensor: str, bearer_token: str) -> Optional[float]:
     """Get a sensor reading from the Home Assistant API."""
     headers = {
         "Authorization": f"Bearer {bearer_token}",
@@ -84,7 +87,12 @@ def get_sensor_reading(sensor: str, bearer_token: str) -> Optional[str]:
         logging.info(
             "Got reading: %s for sensor %s", response.json()["state"], sensor
         )
-        return response.json()["state"]
+        try:
+            state = response.json()["state"]
+            return float(state)
+        except ValueError:
+            logging.warning("Got non-float value %s for sensor %s", state, sensor)
+            return None
 
     logging.warning("Failed to get reading for sensor %s", sensor)
     return None
