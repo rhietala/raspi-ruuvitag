@@ -20,7 +20,7 @@ from Adafruit_LED_Backpack import SevenSegment  # type: ignore
 UPDATE_INTERVAL = 5
 HOMEASSISTANT_ENDPOINT = "http://192.168.1.2:8123/api/states"
 HOMEASSISTANT_SENSORS = [
-    "sensor.a11b_temperature",
+    "sensor.makuuhuone_lampotila",
     "sensor.ulkolampotila",
 ]
 LED_BRIGHTNESS_HIGH = 15
