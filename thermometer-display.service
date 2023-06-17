@@ -8,8 +8,8 @@ User=pi
 Group=pi
 WorkingDirectory=/home/pi/raspi-ruuvitag
 ExecStart=/usr/bin/env python thermometer_display.py
-StandardOutput=syslog
-StandardError=syslog
+StandardOutput=journal
+StandardError=journal
 Restart=always
 RestartSec=2
 Environment="HOMEASSISTANT_BEARER_TOKEN=foobar"
