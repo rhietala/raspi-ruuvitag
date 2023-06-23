@@ -21,11 +21,23 @@ and presents it.
 
 Thermometer display fetches data from HomeAssistant over HTTP and shows it.
 
-![Photo of thermometer display in action](thermometer.jpg)
+Instructions for building the case are in separate file
+[thermometer-display.md](thermometer-display.md)
+
+![Photo of thermometer display in action](img/IMG_2431.jpeg)
 
 ## Prerequisites on Raspberries
 
 Devops is not automated, these have to be done manually.
+
+Raspberry Pi boot configuration, `/boot/config.txt` must have these lines:
+
+```
+[all]
+dtparam=i2c1=on
+dtparam=i2c_arm=on
+dtoverlay=hifiberry-dac
+```
 
 Installation:
 
@@ -35,6 +47,8 @@ $ pwd
 
 $ sudo usermod -a -G i2c pi
 $ sudo apt-get install bluez bluez-hcidump git
+$ sudo update-alternatives --install  /usr/bin/python python /usr/bin/python3 1
+$ sudo timedatectl set-timezone Europe/Helsinki
 $ git clone https://github.com/rhietala/raspi-ruuvitag.git
 $ cd raspi-ruuvitag
 $ python -m pip install -r requirements.txt
