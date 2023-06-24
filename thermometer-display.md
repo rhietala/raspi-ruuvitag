@@ -46,16 +46,16 @@ Steps:
 4. Make sure that the display and wood surface are in level
 5. Glue the veneer sheet
 
-![](img/woodblock.png)
-![](img/IMG_1594.JPEG)
-![](img/IMG_1623.JPEG)
-![](img/IMG_2437.JPEG)
+![](img/woodblock.jpeg)
+![](img/IMG_1594.jpeg)
+![](img/IMG_1623.jpeg)
+![](img/IMG_2437.jpeg)
 
 ## 3D-printing
 
 Designs for 3D-printing are in Tinkercad: [Thermometer display](https://www.tinkercad.com/things/30tTfOi6fes?sharecode=TxVxdVy0iR1J2bpMC8Cm7TX_KI9lceQIwGoO33NyMPI).
 
-![](img/3d-prints.png)
+![](img/3d-prints.jpeg)
 ![](img/IMG_2434.jpeg)
 
 _Without HifiBerry:_ The case must be modified if it is used without HifiBerry as
