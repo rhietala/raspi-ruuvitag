@@ -3,6 +3,17 @@
 The idea for this project was to make a pretty Raspberry Pi zero based clock
 and thermometer display.
 
+## Table of contents
+
+1. [Parts](#parts)
+2. [Woodwork](#woodwork)
+3. [3D-printing](#3d-printing)
+4. [Electronics](#electronics)
+5. [Software](#software)
+6. [Assembly](#assembly)
+
+---
+
 ![](img/IMG_2431.jpeg)
 
 Temperature readings are fetched from HomeAssistant, and not part of this guide.
@@ -46,17 +57,18 @@ Steps:
 4. Make sure that the display and wood surface are in level
 5. Glue the veneer sheet
 
-![](img/woodblock.jpeg)
-![](img/IMG_1594.jpeg)
-![](img/IMG_1623.jpeg)
-![](img/IMG_2437.jpeg)
+|                         |                        |
+| ----------------------- | ---------------------- |
+| ![](img/woodblock.jpeg) | ![](img/IMG_1594.jpeg) |
+| ![](img/IMG_1623.jpeg)  | ![](img/IMG_2437.jpeg) |
 
 ## 3D-printing
 
 Designs for 3D-printing are in Tinkercad: [Thermometer display](https://www.tinkercad.com/things/30tTfOi6fes?sharecode=TxVxdVy0iR1J2bpMC8Cm7TX_KI9lceQIwGoO33NyMPI).
 
-![](img/3d-prints.jpeg)
-![](img/IMG_2434.jpeg)
+|                         |                        |
+| ----------------------- | ---------------------- |
+| ![](img/3d-prints.jpeg) | ![](img/IMG_2434.jpeg) |
 
 _Without HifiBerry:_ The case must be modified if it is used without HifiBerry as
 the supports that keep Raspberry Pi in place depend on it. Case height can be also
@@ -73,8 +85,9 @@ First five header pins in Raspberry Pi must be longer than the rest, and extend 
 bottom. In the picture I have seven as 2x5 connectors were unavailable. I also have
 two 11mm spacers on the connector side for extra firmness.
 
-![Raspberry Pi with header pins soldered](img/IMG_2443.jpeg)
-![Raspberry Pi with HifiBerry pHat](img/IMG_2444.jpeg)
+|                                                              |                                                        |
+| ------------------------------------------------------------ | ------------------------------------------------------ |
+| ![Raspberry Pi with header pins soldered](img/IMG_2443.jpeg) | ![Raspberry Pi with HifiBerry pHat](img/IMG_2444.jpeg) |
 
 Ribbon cable and connectors have a marker for the first pin. For the display
 connectors, these should be matched so that the cable goes straight through
@@ -105,14 +118,14 @@ pair orders according to the diagram below:
 +---+---+---+---+---+
 ```
 
-![](img/IMG_2442.jpeg)
-
 Each display on I2C bus must have a different address. These are defined with address
 selection jumpers that are in the bottom part of displays in the following picture.
 First display has the first jumper soldered (I2C address `0x71`), second has the
 second (`0x72`) and third doesn't have any (`0x70`).
 
-![](img/IMG_2451.jpeg)
+|                        |                        |
+| ---------------------- | ---------------------- |
+| ![](img/IMG_2442.jpeg) | ![](img/IMG_2451.jpeg) |
 
 _Without HifiBerry:_ Cable pairs must not be flipped as the Raspberry Pi connector
 will be on the top. The pair ordering must still be according to the diagram.
@@ -126,14 +139,14 @@ installing required software are in
 ## Assembly
 
 1. Displays are held in place with two plastic parts.
-   ![](img/IMG_2439.jpeg)
 2. Raspberry Pi goes to the case with ribbon cable coming out from the bottom.
    There are small plastic strips at the bottom, inside the case that keep
    Raspberry Pi in place vertically. SD-card goes to the groove on the side.
-   ![](img/IMG_2445.jpeg)
-   ![](img/IMG_2446.jpeg)
 3. Back cover and case are held together with screws. When the cover is at the
    center, the whole display tilts a little backwards.
-   ![](img/IMG_2427.jpeg)
-4. And the finished project again!
-   ![](img/IMG_2431.jpeg)
+
+|                        |                        |
+| ---------------------- | ---------------------- |
+| ![](img/IMG_2439.jpeg) | ![](img/IMG_2445.jpeg) |
+| ![](img/IMG_2446.jpeg) | ![](img/IMG_2427.jpeg) |
+| ![](img/IMG_2431.jpeg) |                        |
