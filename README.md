@@ -47,6 +47,7 @@ $ pwd
 
 $ sudo usermod -a -G i2c pi
 $ sudo apt-get install bluez bluez-hcidump git
+$ sudo systemctl enable hciuart.service
 $ sudo update-alternatives --install  /usr/bin/python python /usr/bin/python3 1
 $ sudo timedatectl set-timezone Europe/Helsinki
 $ git clone https://github.com/rhietala/raspi-ruuvitag.git
@@ -189,6 +190,11 @@ $ sudo systemctl status thermometer-display
 
 Jan 07 21:08:25 rpi env[1249]: INFO:root:Got reading: 16.95 for sensor sensor.a11b_temperature
 ```
+
+## standalone.py
+
+Standalone version of thermometer display. This will track one ruuvitag and display
+its temperature on one display and elapsed playing time of MPD on another.
 
 ## Development
 

@@ -10,14 +10,17 @@ import logging
 import os
 from datetime import datetime
 from time import sleep
-from typing import Any, Optional, Sequence, TypedDict
+from typing import Any, List, Optional, TypedDict
 
 import requests
 
 # pylint: disable=import-error
 from Adafruit_LED_Backpack import SevenSegment  # type: ignore
 
-UPDATE_INTERVAL = 5
+UPDATE_INTERVAL = 5  # seconds
+HOMEASSISTANT_UPDATE_CYCLE = (
+    12  # UPDATE_INTERVAL * HOMEASSISTANT_UPDATE_CYCLE = 60 seconds
+)
 HOMEASSISTANT_ENDPOINT = "http://192.168.1.2:8123/api/states"
 HOMEASSISTANT_SENSORS = [
     "sensor.makuuhuone_lampotila",
@@ -26,46 +29,66 @@ HOMEASSISTANT_SENSORS = [
 LED_BRIGHTNESS_HIGH = 15
 LED_BRIGHTNESS_LOW = 1
 
+Display = Any
+
 
 class State(TypedDict):
     """State for thermometer."""
 
-    display_colon: bool
+    brightness: int
+    time: Optional[str]
+    temperatures: List[Optional[float]]
+    homeassistant_update_cycle: int
 
 
-STATE: State = {"display_colon": True}
+STATE: State = {
+    "brightness": LED_BRIGHTNESS_HIGH,
+    "time": None,
+    "temperatures": [None, None],
+    "homeassistant_update_cycle": 0,  # update on first iteration
+}
 
 
-def display_time(display) -> None:
+def display_time(display: Display) -> None:
     """Display the current time on the 7-segment display."""
-    display.print_number_str(datetime.now().strftime("%H%M"))
+    current_time = datetime.now().strftime("%H%M")
 
-    # Colon will change on/off on every update so that
-    # it shows whether the display is updating or not
-    display.set_colon(STATE["display_colon"])
-    STATE["display_colon"] = not STATE["display_colon"]
+    if current_time != STATE["time"]:
+        STATE["time"] = current_time
+        display.clear()
+        display.print_number_str(STATE["time"])
+        display.set_colon(True)
+        display.write_display()
 
 
 def display_temperatures(
-    displays: Sequence[Any], temperatures: Sequence[Optional[float]]
+    displays: List[Display], temperatures: List[Optional[float]]
 ) -> None:
     """Display the temperatures on the 7-segment displays."""
-    for display, temperature in zip(displays, temperatures):
-        if temperature:
-            display.print_float(temperature, decimal_digits=1)
-        else:
-            display.print_number_str("----")
+    for i, (display, temp, prev_temp) in enumerate(
+        zip(displays, temperatures, STATE["temperatures"])
+    ):
+        if temp != prev_temp:
+            STATE["temperatures"][i] = temp
+            display.clear()
+            if temp:
+                display.print_float(temp, decimal_digits=1)
+            else:
+                display.print_number_str("----")
+
+            display.write_display()
 
 
-def set_display_brightness(displays: Sequence[Any]) -> None:
+def set_display_brightness(displays: List[Display]) -> None:
     """Set the brightness of the displays based on the time of day."""
     brightness = (
         LED_BRIGHTNESS_HIGH
         if 8 <= datetime.now().hour < 21
         else LED_BRIGHTNESS_LOW
     )
-    for display in displays:
-        display.set_brightness(brightness)
+    if brightness != STATE["brightness"]:
+        for display in displays:
+            display.set_brightness(brightness)
 
 
 def get_sensor_reading(sensor: str, bearer_token: str) -> Optional[float]:
@@ -88,10 +111,10 @@ def get_sensor_reading(sensor: str, bearer_token: str) -> Optional[float]:
         return None
 
     try:
-        state = response.json()["state"]
-        value = float(state)
+        sensor_state = response.json()["state"]
+        value = float(sensor_state)
     except ValueError:
-        logging.warning("Got non-float value %s for sensor %s", state, sensor)
+        logging.warning("Got non-float value %s for sensor %s", sensor_state, sensor)
         return None
 
     if value > 1000:
@@ -103,13 +126,12 @@ def get_sensor_reading(sensor: str, bearer_token: str) -> Optional[float]:
     return value
 
 
-
-def get_temperature_readings(bearer_token: str) -> Sequence[Optional[float]]:
+def get_temperature_readings(bearer_token: str) -> List[Optional[float]]:
     """Get temperature readings from the Home Assistant API."""
-    readings = [
+    readings = (
         get_sensor_reading(sensor, bearer_token)
         for sensor in HOMEASSISTANT_SENSORS
-    ]
+    )
 
     return [
         float(reading) if reading is not None else None for reading in readings
@@ -129,28 +151,30 @@ def main():
 
     displays = (
         SevenSegment.SevenSegment(address=0x70, busnum=1),
-        SevenSegment.SevenSegment(address=0x71, busnum=1),
+        SevenSegment.SevenSegment(address=0x74, busnum=1),
         SevenSegment.SevenSegment(address=0x72, busnum=1),
     )
 
     for display in displays:
         display.begin()
+        display.set_brightness(STATE["brightness"])
+        display.print_number_str("----")
+        display.write_display()
 
     logging.info("Starting main loop, exit with Ctrl-C")
 
     while True:
-        for display in displays:
-            display.clear()
+        if STATE["homeassistant_update_cycle"] <= 0:
+            temperatures = get_temperature_readings(bearer_token)
+            display_temperatures(
+                displays[1:], temperatures
+            )
+            STATE["homeassistant_update_cycle"] = HOMEASSISTANT_UPDATE_CYCLE
+        else:
+            STATE["homeassistant_update_cycle"] -= 1
 
         set_display_brightness(displays)
         display_time(displays[0])
-        display_temperatures(
-            displays[1:], get_temperature_readings(bearer_token)
-        )
-
-        for display in displays:
-            display.write_display()
-
         sleep(UPDATE_INTERVAL)
 
 
