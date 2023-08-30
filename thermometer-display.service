@@ -12,8 +12,8 @@ ExecStart=/usr/bin/env python thermometer_display.py
 StandardOutput=journal
 StandardError=journal
 Restart=always
-RestartSec=2
-Environment="HOMEASSISTANT_BEARER_TOKEN=foobar"
+RestartSec=10
+EnvironmentFile=/home/pi/raspi-ruuvitag/.env
 
 [Install]
 WantedBy=multi-user.target
