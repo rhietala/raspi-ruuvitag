@@ -66,7 +66,7 @@ def display_temperatures(
         if temp != prev_temp:
             STATE["temperatures"][i] = temp
             display.clear()
-            if temp:
+            if temp is not None:
                 display.print_float(temp, decimal_digits=1)
             else:
                 display.print_number_str("----")
@@ -131,13 +131,9 @@ def get_temperature_readings(
     homeassistant_sensors: List[str],
 ) -> List[Optional[float]]:
     """Get temperature readings from the Home Assistant API."""
-    readings = (
+    return [
         get_sensor_reading(homeassistant_endpoint, sensor, bearer_token)
         for sensor in homeassistant_sensors
-    )
-
-    return [
-        float(reading) if reading is not None else None for reading in readings
     ]
 
 
