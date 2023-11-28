@@ -8,6 +8,7 @@ https://github.com/ttu/ruuvitag-sensor/blob/master/examples/http_server_asyncio_
 
 import json
 import logging
+from datetime import datetime
 from inspect import currentframe, getframeinfo
 from os.path import abspath, dirname
 from typing import Dict, Tuple, TypedDict
@@ -51,6 +52,13 @@ async def get_data(request):
     mac: Mac = request.match_info.get("mac")
     if mac not in STATE:
         return web.json_response(status=404)
+
+    # check if data is older than 1 hour
+    updated_at = datetime.fromisoformat(STATE[mac]["time"])
+    if (datetime.utcnow() - updated_at).total_seconds() > 3600:
+        STATE.pop(mac)
+        return web.json_response(status=404)
+
     return web.json_response(STATE[mac])
 
 
